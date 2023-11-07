@@ -10,6 +10,8 @@ Cross validation
 ## K-fold Cross Validation
 k = 5
 
+파란색 부분만이 검증 데이터 
+
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/4888608a-9305-46f7-9a76-b5b2aa5752c0)
 
 ## 유방암 데이터셋을 이용한 실습
@@ -27,6 +29,7 @@ df['target'] = data['target']
 
 df.head()
 ```
+타겟 0 : 양성, 1 : 악성
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/6baeec21-b909-4a36-8217-7beb06392902)
 
@@ -87,13 +90,16 @@ accuracy_score(y_val, y_pred)
 ## 교차 검증을 위한 데이터 분할
 ```python
 from sklearn.model_selection import KFold
+// KFold 데이를 나누는 패키지를 가져온다.
 
 cv = KFold(n_splits=5)
+// 데이터를 5개로 나누어주는 객체를 생성한다.
 
 for i, (train_indices, val_indices) in enumerate(cv.split(scaled)):
   print('i =', i + 1)
   print('train_indices', train_indices)
   print('val_indices', val_indices)
+// 트레이닝할 인덱스와 검증할 인덱스를 뽑는다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/dfebd04f-acb9-439a-a0cc-34f086cb1619)
@@ -109,24 +115,28 @@ for i, (train_indices, val_indices) in enumerate(cv.split(scaled)):
 ## 교차 검증 (진부한 방법)
 ```python
 model = LogisticRegression()
+// 로지스틱 회귀 객체 생성
 
 cv = KFold(n_splits=5)
+// 데이터를 5개로 나누어주는 객체를 생성한다.
 
 accs = []
 
 for train_indices, val_indices in cv.split(scaled):
   x_train = scaled[train_indices]
   y_train = df.loc[train_indices]['target']
+// x트레인에 데이터는 전처리한 데이터의 트레인 인덱스를 넣고 y트레인은 트레인 인덱스의 타겟만 넣는다.
 
   x_val = scaled[val_indices]
   y_val = df.loc[val_indices]['target']
+// x벨리데이션은 벨리데이션 인덱스를 넣고, y벨리데이션은 델리데이션 인덱스의 타겟만 넣는다.
 
   model.fit(x_train, y_train)
-
+// 모델 학습
   y_pred = model.predict(x_val)
-
+// 정답값예측
   accs.append(accuracy_score(y_val, y_pred))
-
+// 정답값과 예측값을 비교하여 정확도를 확인한다.
 accs
 ```
 
@@ -135,12 +145,16 @@ accs
 ## 교차 검증 (간단한 방법)
 ```python
 from sklearn.model_selection import cross_val_score
+// cross_val_score 패키지를 가져온다.
 
 model = LogisticRegression()
+// 로지스틱 회귀 모델 객체 생성
 
 cv = KFold(n_splits=5)
+// 데이터를 5개로 나누어주는 객체를 생성한다.
 
 accs = cross_val_score(model, scaled, df['target'], cv=cv)
+// cross_val_score 안에 모델, 학습시킬 데이터, 라벨, 5개로 나누어준 데이터를 넣어주면 교차 검증이된다.
 
 accs
 ```
@@ -149,13 +163,13 @@ accs
 
 ```python
 from sklearn.svm import SVC
-
+// svc 모델 패키지를 가져온다
 model = SVC()
-
+// svc 모델 객체 생성
 cv = KFold(n_splits=5)
-
+// 데이터를 5개로 나누어주는 객체를 생성한다.
 accs = cross_val_score(model, scaled, df['target'], cv=cv)
-
+// cross_val_score 함수를 사용해서 교차 검증을 한다.
 accs
 ```
 
@@ -165,7 +179,7 @@ accs
 교차 검증을 사용하지 않았을 때의 결과와 비교해서 더 나아졌다고 말할 수 있을까
 
 # 데이터 증강 기법
-Data augmentation
+Data augmentation (증강)
 
 과대적합을 해결하고 정확도를 높이기 위해 데이터의 양을 증가시키는 방법
 
@@ -176,25 +190,33 @@ Data augmentation
 from sklearn.datasets import load_digits
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
+// digits 데이터셋, 정규화, matplotlib 패키지를 가져온다.
 
 digits = load_digits()
+// 데이터셋을 넣는다.
 
 data = digits['data']
 target = digits['target']
+// 데이터와 타겟을 넣는다.
 
 scaler = MinMaxScaler()
 scaled = scaler.fit_transform(data)
+// 데이터를 정규화한 값으로 변환시켜 넣는다.
 
 fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
-
+// 가로 16 세로 8 사이즈에 2행 5열 차트를 만든다.
+ 
 for i, ax in enumerate(axes.flatten()):
   ax.imshow(scaled[i].reshape((8, 8)))
   ax.set_title(target[i])
+// 라벨을 데이터셋 로드를 했다. 
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/af876edc-c1bc-4cea-9e50-0fe7018a588a)
 
 ## 데이터 분할
+데이터를 분할하는 이유는 train 세트만 imgaug를 할것이다. 왜냐하면 검증 세트를 건들지 않아야 정확하게 검증을 할 수 있기 때문이다.
+
 ```python
 from sklearn.model_selection import train_test_split
 // train_test_split 패키지를 가져온다.
@@ -252,6 +274,7 @@ imgaug의 Sequential은 이미지를 입력으로 받는다 (reshape 필요)
 
 ```python
 import imgaug.augmenters as iaa
+// imgaug 패키지를 가져온다.
 
 seq = iaa.Sequential([
   iaa.Affine(
@@ -260,8 +283,12 @@ seq = iaa.Sequential([
   ),
   iaa.GaussianBlur(sigma=(0, 0.5))
 ])
+// sequential 클래스를 사용하고, affine translate_px를 한다.
+// 픽셀을 좌우로 -1부터 좌측으로 1 우측으로 1픽셀씩 랜덤으로 이동 시킬거고 위아래로 -1에서 1픽셀 이동 시킬거고 회전을 -15도에서부터 15까지 랜덤으로 줄것이다.
+// 뿌옇게하는 정도를 0부터 0.5까지 랜덤으로 나타나게 한다.
 
 x_train_aug = seq(images=x_train.reshape((-1, 8, 8)))
+// 시퀀셜 오브젝트에 이미지를 넣는데 트레인 이미지만 넣고 이미지 어그라는 패키지는 이미지 형태로 받아야 되기 떄문에 8x8로 만들어서 넣어야한다.
 
 fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
 
@@ -275,12 +302,18 @@ for i, ax in enumerate(axes.flatten()):
 ## 증강 전 데이터와 증강 후 데이터 합치기
 ```python
 import numpy as np
+// numpy 패키지를 가져온다.
 
 x_train_merged = np.concatenate([x_train, x_train_aug.reshape((-1, 64))], axis=0)
+// np.concatenate 함수를 사용하여 0번축으로 원래 x트레인 데이터와 어그멘테이션된 x트레인을 합친다.
 y_train_merged = np.concatenate([y_train, y_train], axis=0)
+// np.concatenate 함수를 사용하여 0번축으로 y트레인과 y트레인을 합친다.
+// y트레인은 라벨 값이기 때문에 어차피 어그멘테이션해도 데이터가 안바뀌기 때문에 y트레인만 합쳐도된다.
 
 print(x_train_merged.shape, y_train_merged.shape)
+// 데이터가 어떻게 들어가 있는지 확인한다.
 ```
+2배로 커진 데이터 셋을 확인할 수 있다.
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/f4f40503-10ae-4e5e-89c2-1e964a07860b)
 
@@ -404,16 +437,24 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import mean_absolute_error
+// 선형회귀, 표준화, 파이프라인, mean_absolute_error 패키지를 가져온다.
+
 
 lr = make_pipeline(
     StandardScaler(),
     LinearRegression()
 )
+// 표준화를 하고 선형회귀를 하는 파이프라인을 lr 변수에 저장한다.
 
 lr.fit(x_train, y_train)
+// 자동으로 훈련시켜준다.
+
 lr_y_pred = lr.predict(x_val)
+// 자동으로 예측해준다.
 
 lr_mae = mean_absolute_error(y_val, lr_y_pred)
+// 회귀문제를 풀기 때문에 mean_absolute_error나 mean_squared_error를 사용하는데 여기서는 mean_absolute_error를 사용하여 검증한다.
+
 lr_mae
 ```
 
@@ -423,31 +464,38 @@ lr_mae
 https://scikit-learn.org/stable/modules/linear_model.html
 ```python
 from sklearn.linear_model import Ridge
+// Ridge 모델 패키지를 가져온다.
 
 ridge = Ridge()
+// 모델 객체 생성
 
 ridge.fit(x_train, y_train)
 ridge_y_pred = ridge.predict(x_val)
+// 훈련, 값 예측
 
 ridge_mae = mean_absolute_error(y_val, ridge_y_pred)
+// 검증
 ridge_mae
-```
+``` 
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/58a1a2f8-4647-4499-b476-05b0e1cbf56a)
 
 ### Lassso
 ```python
 from sklearn.linear_model import Lasso
-
+// Lasso 모델 패키지를 가져온다.
 lasso = make_pipeline(
     StandardScaler(),
     Lasso()
 )
+// 파이프라인에 표준화, 라쏘를 순서대로 넣어본다.
 
 lasso.fit(x_train, y_train)
 lasso_y_pred = lasso.predict(x_val)
+// 자동으로 훈련과 예측을 해준다.
 
 lasso_mae = mean_absolute_error(y_val, lasso_y_pred)
+// 검증
 lasso_mae
 ```
 
@@ -456,16 +504,20 @@ lasso_mae
 ### Elastic-Net
 ```python
 from sklearn.linear_model import ElasticNet
+// ElasticNet 패키지를 가져온다.
 
 en = make_pipeline(
     StandardScaler(),
     ElasticNet()
 )
+// 파이프라인에 표준화, ElasticNet을 순서대로 넣어준다.
 
 en.fit(x_train, y_train)
 en_y_pred = en.predict(x_val)
+// 자동으로 훈련과 예측을 해준다.
 
 en_mae = mean_absolute_error(y_val, en_y_pred)
+// 검증
 en_mae
 ```
 
@@ -476,6 +528,7 @@ en_mae
 
 ```python
 (lr_y_pred + ridge_y_pred + lasso_y_pred + en_y_pred) / 4
+// 예측값을 다 더해서 나눈다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/af4566e5-60d3-4b5f-a289-088e04ff321e)
@@ -483,6 +536,7 @@ en_mae
 ### Voting MAE
 ```python
 mean_absolute_error(y_val, (lr_y_pred + ridge_y_pred + lasso_y_pred + en_y_pred) / 4)
+// 평균을 예측한 값에 정답값하고 mean_absolute_error를 사용하여 계산한다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/0958f87e-dae6-4411-88e6-337a32a47d52)
@@ -490,6 +544,7 @@ mean_absolute_error(y_val, (lr_y_pred + ridge_y_pred + lasso_y_pred + en_y_pred)
 ### voting (간단한 방법)
 ```python
 from sklearn.ensemble import VotingRegressor
+// VotingRegressor 패키지를 가져온다.
 
 models = [
     ('lr', lr),
@@ -497,19 +552,24 @@ models = [
     ('lasso', lasso),
     ('en', en)
 ]
+// lr, ridge, lasso, en 회귀들을 models에 넣어준다.
 
 vr = VotingRegressor(models)
+// VotingRegressor에 models를 넣어준다.
 
 vr.fit(x_train, y_train)
+// VotingRegressor를 훈련시킨다.
 
 y_pred = vr.predict(x_val)
+// VotingRegressor를 예측한 값을 저장한다.
 
 mean_absolute_error(y_val, y_pred)
+// mean_absolute_error로 계산한다. 
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/7006e58d-9af1-4c7f-b677-1969803b85b9)
 
-### MNIST 데이터셋을 사용한 실습
+### MNIST 데이터셋을 사용한 실습 (보스턴 데이터셋은 실수기 때문에 회귀로 풀었지만 MNIST 데이터셋은 10개 숫자를 구분하는 분류문제기 때문에 분류에서 앙상블을 사용하는 것을 보여주기 위해서 실습한다.)
 ```python
 from sklearn.datasets import load_digits
 from sklearn.preprocessing import MinMaxScaler
@@ -546,20 +606,26 @@ from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
+// VotingClassifier, SVC, KNeighborsClassifier, DecisionTreeClassifier, accuracy_score 패키지를 가져온다.
 
 models = [
     ('svc', SVC()), 
     ('knn', KNeighborsClassifier(n_neighbors=5)),
     ('dt', DecisionTreeClassifier())
 ]
+// SVC, knn, dt를 models에 다 넣어준다.
 
 vc = VotingClassifier(models, voting='hard')
+// hard voting을 한다.
 
 vc.fit(x_train, y_train)
+// VotingClassifier 학습
 
 y_pred = vc.predict(x_val)
+// VotingClassifier 예측
 
 accuracy_score(y_val, y_pred) * 100
+// 정확도 확인
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/c65ad5dc-0849-4591-bc3d-1be95f40eff1)
@@ -571,18 +637,24 @@ accuracy_score(y_val, y_pred) * 100
 ### Voting (Soft)
 ```python
 models = [
-    ('svc', SVC(probability=True)), 
+    ('svc', SVC(probability=True)),
+// SVC를 그냥 쓰면 확률값을 반환하지 않기 때문에 probability=True를 사용한다.
     ('knn', KNeighborsClassifier(n_neighbors=5)),
     ('dt', DecisionTreeClassifier())
 ]
+// SVC, knn, dt를 models에 다 넣어준다.
 
 vc = VotingClassifier(models, voting='soft')
+// soft voting을 한다.
 
 vc.fit(x_train, y_train)
+// VotingClassifier 학습
 
 y_pred = vc.predict(x_val)
+// VotingClassifier 예측
 
 accuracy_score(y_val, y_pred) * 100
+// 정확도 확인
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/d242ab85-84a5-4f0c-bd5f-292f7cf145fe)
@@ -603,14 +675,19 @@ Bootstrap AGGregatING
 
 ```python
 from sklearn.ensemble import RandomForestClassifier
+// RandomForestClassifier 패키지를 가져온다.
 
 model = RandomForestClassifier(n_estimators=100)
+// decision tree가 100개인 RandomForestClassifier 객체 생성
 
 model.fit(x_train, y_train)
+// 모델 훈련
 
 y_pred = model.predict(x_val)
+// 정답값 예측
 
 accuracy_score(y_pred, y_val) * 100
+// 정확도 확인
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/98ff7430-8819-4458-bb93-c7ae3be107a5)
