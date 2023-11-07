@@ -16,11 +16,14 @@ k = 5
 ```python
 from sklearn.datasets import load_breast_cancer
 import pandas as pd
+// 유방암 데이터셋과 판다스 패키지를 가져온다.
 
 data = load_breast_cancer()
+// data에 유방암 데이터셋을 넣는다.
 
 df = pd.DataFrame(data['data'], columns=data['feature_names'])
 df['target'] = data['target']
+// 판다스 데이터 프레임으로 바꾼 후 data에는 유방암 데이터셋에 있는 data를 넣고, columns에는 feature_names를 넣고, target에는 data에 target를 넣어준다
 
 df.head()
 ```
@@ -32,10 +35,13 @@ df.head()
 ## 전처리
 ```python
 from sklearn.preprocessing import StandardScaler
+// 표준화 패키지를 가져온다.
 
 scaler = StandardScaler()
+// scaler에 표준화 패키지 객체를 생성한다.
 
 scaled = scaler.fit_transform(df.drop(columns=['target']))
+// scaled에 target 데이터를 삭제하고 표준화 형태로 변환한 데이터 값을 넣어준다.
 
 scaled[0]
 ```
@@ -45,11 +51,14 @@ scaled[0]
 ## 데이터셋 분할
 ```python
 from sklearn.model_selection import train_test_split
+// train_test_split 패키지를 가져온다.
 
 x_train, x_val, y_train, y_val = train_test_split(scaled, df['target'], test_size=0.2, random_state=2020)
+// 훈련 데이터와 검증 데이터로 데이터를 분할한다.
 
 print(x_train.shape, y_train.shape)
 print(x_val.shape, y_val.shape)
+// 데이터가 어떻게 들어가 있는지 확인한다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/5ddb4586-9ab2-4bd8-85ce-d0f5380330f3)
@@ -58,14 +67,19 @@ print(x_val.shape, y_val.shape)
 ```python
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+// 로지스틱 회귀 모델과 accuracy_score 정확도 패키지를 가져온다.
 
 model = LogisticRegression()
+// 모델 객체 생성
 
 model.fit(x_train, y_train)
+// 모델 학습
 
 y_pred = model.predict(x_val)
+// 검증 데이터로 정답값 예측
 
 accuracy_score(y_val, y_pred)
+// 정답값과 예측값을 비교하여 정확도를 확인한다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/d269ce83-a510-4086-b167-a21593191456)
@@ -183,11 +197,14 @@ for i, ax in enumerate(axes.flatten()):
 ## 데이터 분할
 ```python
 from sklearn.model_selection import train_test_split
+// train_test_split 패키지를 가져온다.
 
 x_train, x_val, y_train, y_val = train_test_split(scaled, target, test_size=0.2, random_state=2021)
+// 훈련 데이터와 검증 데이터로 분할한다.
 
 print(x_train.shape, y_train.shape)
 print(x_val.shape, y_val.shape)
+// 데이터가 어떻게 들어가 있는지 확인한다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/c19015b4-0474-47df-91d5-b135967d9b2c)
@@ -196,14 +213,19 @@ print(x_val.shape, y_val.shape)
 ```python
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
+// svc모델과 accuracy_score 정확도 패키지를 가져온다.
 
 model = SVC()
+// 모델 객체 생성
 
 model.fit(x_train, y_train)
+// 모델 학습
 
 y_pred = model.predict(x_val)
+// 검증데이터를 이용한 정답값 예측
 
 accuracy_score(y_val, y_pred) * 100
+// 정답값과 예측값을 비교하여 정확도 확인
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/cb930a2b-fa99-47ee-a2ab-24e1404f3669)
@@ -266,14 +288,19 @@ print(x_train_merged.shape, y_train_merged.shape)
 ```python
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
+// svc모델과 accuracy_score 정확도 패키지를 가져온다.
 
 model = SVC()
+// 모델 객체 생성
 
 model.fit(x_train_merged, y_train_merged)
+// 모델 훈련
 
 y_pred = model.predict(x_val)
+// 검증데이터로 정답값을 예측한다.
 
 accuracy_score(y_val, y_pred) * 100
+// 정답값과 예측값을 비교하여 정확도를 확인한다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/cb578401-f74e-4d1e-93b4-952a5808b523)
@@ -305,12 +332,16 @@ print(x_train_merged.shape, y_train_merged.shape)
 ## 학습, 검증
 ```python
 model = SVC()
+// 모델 객체 생성
 
 model.fit(x_train_merged, y_train_merged)
+// 모델 훈련
 
 y_pred = model.predict(x_val)
+// 검증데이터로 정답값 예측
 
 accuracy_score(y_val, y_pred) * 100
+// 정답값과 예측값을 비교하여 정확도를 확인한다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/907967bc-fa18-4d1c-8fab-bf85a28bcd24)
@@ -328,11 +359,14 @@ accuracy_score(y_val, y_pred) * 100
 ```python
 from sklearn.datasets import load_boston
 import pandas as pd
+// 보스턴 데이터셋과 판다스 패키지를 가져온다.
 
 data = load_boston()
+// 데이터에 보스턴 데이터셋을 넣어준다.
 
 df = pd.DataFrame(data['data'], columns=data['feature_names'])
 df['target'] = data['target']
+// data는 보스턴 데이터셋에 data를 넣고, columns에는 feature_names를 target은 target을 넣는다.
 
 df.head()
 ```
@@ -342,11 +376,14 @@ df.head()
 ### 데이터셋 분할
 ```python
 from sklearn.model_selection import train_test_split
+// train_test_split 패키지를 가져온다.
 
 x_train, x_val, y_train, y_val = train_test_split(df.drop(columns=['target']), df['target'], test_size=0.2, random_state=2021)
+// 트레인 데이터와 검증 데이터로 분할한다.
 
 print(x_train.shape, y_train.shape)
 print(x_val.shape, y_val.shape)
+// 데이터가 어떻게 들어가 있는지 확인한다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/131c16df-fc06-43ac-9c48-93ed3a5d5d46)
@@ -383,6 +420,7 @@ lr_mae
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/881cc6cf-e1c2-4613-8b0d-79f8209c1fa5)
 
 ### Ridge Regression
+https://scikit-learn.org/stable/modules/linear_model.html
 ```python
 from sklearn.linear_model import Ridge
 
@@ -475,20 +513,28 @@ mean_absolute_error(y_val, y_pred)
 ```python
 from sklearn.datasets import load_digits
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_spli
+// load_digits 데이터셋과 정규화패키지와 train_test_split 패키지를 가져온다.
 
 digits = load_digits()
+// digits 데이터셋을 넣는다.
 
 data = digits['data']
 target = digits['target']
+// data는 digtits 데이터를 넣는다.
 
 scaler = MinMaxScaler()
+// scaler에 정규화 패키지 객체 생성
+
 scaled = scaler.fit_transform(data)
+// scaled에 정규화 형태로 바꾼 데이터를 넣는다.
 
 x_train, x_val, y_train, y_val = train_test_split(scaled, target, test_size=0.2, random_state=2021)
+// 트레인 데이터와 검증 데이터로 데이터를 분할한다.
 
 print(x_train.shape, y_train.shape)
 print(x_val.shape, y_val.shape)
+// 데이터가 어떻게 들어가 있는지 확인한다.
 ```
 
 ![image](https://github.com/hsy0511/bbang-hyung-6/assets/104752580/83618772-a0ad-434c-9494-a72aad03c463)
